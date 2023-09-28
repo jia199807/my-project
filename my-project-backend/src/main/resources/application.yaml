@@ -1,0 +1,5 @@
+spring:
+  security:
+    jwt:
+      key: abcdefhijk
+      expire: 7
