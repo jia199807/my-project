@@ -91,18 +91,24 @@ public class JwtUtils {
         }
     }
 
-    public String createJwt(UserDetails details,int id,String username){
-        Algorithm algorithm=Algorithm.HMAC256(key);
-        Date expireTime = this.expireTime();
-        return JWT.create()
-                .withJWTId(UUID.randomUUID().toString())
-                .withClaim("id",id)
-                .withClaim("name",username)
-                .withClaim("authorities",details.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
-                .withExpiresAt(expireTime)
-                .withIssuedAt(new Date())
-                .sign(algorithm);
-
+    /**
+     * 根据UserDetails生成对应的Jwt令牌
+     * @param user 用户信息
+     * @return 令牌
+     */
+    public String createJwt(UserDetails user, String username, int userId) {
+            Algorithm algorithm = Algorithm.HMAC256(key);
+            Date expire = this.expireTime();
+            return JWT.create()
+                    .withJWTId(UUID.randomUUID().toString())
+                    .withClaim("id", userId)
+                    .withClaim("name", username)
+                    .withClaim("authorities", user.getAuthorities()
+                            .stream()
+                            .map(GrantedAuthority::getAuthority).toList())
+                    .withExpiresAt(expire)
+                    .withIssuedAt(new Date())
+                    .sign(algorithm);
     }
 
     public Date expireTime(){

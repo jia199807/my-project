@@ -1,4 +1,4 @@
-package com.example.vo.response;
+package com.example.domain.vo.response;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.util.Date;
  * @create: 2023-09-25 23:21
  **/
 @Data
-public class AuthorizeVO {
+public class AuthorizeVo {
     String username;
     String role;
     String token;

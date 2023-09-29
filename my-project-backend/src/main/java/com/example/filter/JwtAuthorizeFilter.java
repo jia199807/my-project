@@ -18,7 +18,8 @@ import java.io.IOException;
 
 /**
  * @program: my-project
- * @description:
+ * @description: * 用于对请求头中Jwt令牌进行校验的工具，为当前请求添加用户验证信息
+ * 并将用户的ID存放在请求对象属性中，方便后续使用
  * @author: 6420
  * @create: 2023-09-28 16:52
  **/
