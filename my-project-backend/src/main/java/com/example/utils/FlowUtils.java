@@ -20,7 +20,7 @@ public class FlowUtils {
         if (template.hasKey(key)){
             return false;
         }else {
-            template.opsForValue().set(key,"",blockTime, TimeUnit.MILLISECONDS);
+            template.opsForValue().set(key,"11",blockTime, TimeUnit.SECONDS);
             return true;
         }
 
