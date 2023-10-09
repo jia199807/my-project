@@ -2,8 +2,10 @@ package com.example.service.impl;
 
 
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.domain.entity.Account;
+import com.example.domain.vo.request.EmailRegisterVo;
 import com.example.mapper.AccountMapper;
 import com.example.service.AccountService;
 import com.example.utils.Const;
@@ -14,8 +16,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Wrapper;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -36,6 +41,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     @Resource
     AmqpTemplate amqpTemplate;
+
+    @Resource
+    PasswordEncoder passwordEncoder;
 
 
     /**
@@ -91,6 +99,39 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
 
     }
+
+    @Override
+    public String registerEmailAccount(EmailRegisterVo registerVo) {
+        String email=registerVo.getEmail();
+        String username = registerVo.getUsername();
+        String key = Const.VERIFY_EMAIL_DATA + email;
+        String code= stringRedisTemplate.opsForValue().get(key);
+        if(code==null)
+            return "请先获取验证码";
+        if(!code.equals(registerVo.getCode()))
+            return "验证码输入错误，请重新输入";
+        if (existAccountByEmail(email))
+            return "此邮箱已被注册";
+        if (existAccountByUsername(username))
+            return "此用户名已被注册";
+
+        String password = passwordEncoder.encode(registerVo.getPassword());
+        Account user = new Account(null, username, password, email, "user", new Date());
+        if(save(user)) {
+            stringRedisTemplate.delete(key);
+            return null;
+        }
+        else
+            return "内部错误，请联系管理员";
+    }
+
+    private boolean existAccountByEmail(String email){
+        return this.baseMapper.exists(lambdaQuery().eq(Account::getEmail,email).getWrapper());
+    }
+    private boolean existAccountByUsername(String username){
+        return this.baseMapper.exists(lambdaQuery().eq(Account::getUsername,username).getWrapper());
+    }
+
     /**
      * @author 6420
      * @description 验证码限流
